@@ -1,6 +1,7 @@
 package core
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -62,6 +63,29 @@ func NewConfig(dir string) (*Config, error) {
 		}
 	}
 
+	return &conf, nil
+}
+
+// NewConfigFromYML returns a new config from yml. dir cannot be empty.
+func NewConfigFromYML(r io.Reader, dir string) (*Config, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	conf := Config{dir: dir}
+	if err := yaml.Unmarshal(b, &conf.data); err != nil {
+		return nil, err
+	}
+	return &conf, nil
+}
+
+// NewConfigFromToml returns a new config from toml. dir cannot be empty.
+func NewConfigFromToml(r io.Reader, dir string) (*Config, error) {
+	conf := Config{dir: dir}
+
+	if _, err := toml.DecodeReader(r, &conf.data); err != nil {
+		return nil, err
+	}
 	return &conf, nil
 }
 
